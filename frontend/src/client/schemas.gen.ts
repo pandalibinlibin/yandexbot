@@ -524,3 +524,38 @@ export const ValidationErrorSchema = {
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
 } as const;
+
+export const YandexTokenCreateSchema = {
+    properties: {
+        token: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Token'
+        }
+    },
+    type: 'object',
+    required: ['token'],
+    title: 'YandexTokenCreate'
+} as const;
+
+export const YandexTokenPublicSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        token: {
+            type: 'string',
+            title: 'Token'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['id', 'token', 'created_at'],
+    title: 'YandexTokenPublic'
+} as const;

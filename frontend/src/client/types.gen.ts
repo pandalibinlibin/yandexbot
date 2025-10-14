@@ -107,6 +107,16 @@ export type ValidationError = {
     type: string;
 };
 
+export type YandexTokenCreate = {
+    token: string;
+};
+
+export type YandexTokenPublic = {
+    id: string;
+    token: string;
+    created_at: string;
+};
+
 export type ItemsReadItemsData = {
     limit?: number;
     skip?: number;
@@ -199,6 +209,16 @@ export type UsersUpdatePasswordMeData = {
 };
 
 export type UsersUpdatePasswordMeResponse = (Message);
+
+export type UsersReadUserYandexTokenResponse = (YandexTokenPublic);
+
+export type UsersCreateUserYandexTokenData = {
+    requestBody: YandexTokenCreate;
+};
+
+export type UsersCreateUserYandexTokenResponse = (YandexTokenPublic);
+
+export type UsersDeleteUserYandexTokenResponse = (Message);
 
 export type UsersRegisterUserData = {
     requestBody: UserRegister;
