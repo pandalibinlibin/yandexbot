@@ -23,6 +23,9 @@ from app.models import (
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
+    YandexToken,
+    YandexTokenCreate,
+    YandexTokenPublic,
 )
 from app.utils import generate_new_account_email, send_email
 
@@ -115,6 +118,72 @@ def update_password_me(
     session.add(current_user)
     session.commit()
     return Message(message="Password updated successfully")
+
+
+@router.get("/me/yandex-token", response_model=YandexTokenPublic)
+def read_user_yandex_token(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Get current user's yandex token.
+    """
+    token = crud.get_user_yandex_token(session=session, owner_id=current_user.id)
+    if not token:
+        raise HTTPException(
+            status_code=404,
+            detail="Yandex token not found",
+        )
+    return token
+
+
+@router.post("/me/yandex-token", response_model=YandexTokenPublic)
+def create_user_yandex_token(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    yandex_token_in: YandexTokenCreate,
+) -> Any:
+    """
+    Create or update current user's Yandex token.
+    """
+    existing_token = crud.get_user_yandex_token(
+        session=session,
+        owner_id=current_user.id,
+    )
+
+    if existing_token:
+        token = crud.update_yandex_token(
+            session=session,
+            db_token=existing_token,
+            yandex_token_in=yandex_token_in,
+        )
+    else:
+        token = crud.create_yandex_token(
+            session=session,
+            yandex_token_in=yandex_token_in,
+            owner_id=current_user.id,
+        )
+
+    return token
+
+
+@router.delete("/me/yandex-token", response_model=Message)
+def delete_user_yandex_token(
+    session: SessionDep,
+    current_user: CurrentUser,
+) -> Any:
+    """
+    Delete current user's Yandex token.
+    """
+    token = crud.get_user_yandex_token(session=session, owner_id=current_user.id)
+    if not token:
+        raise HTTPException(
+            status_code=404,
+            detail="Yandex token not found",
+        )
+    crud.delete_yandex_token(session=session, db_token=token)
+    return Message(message="Yandex token deleted successfully")
 
 
 @router.get("/me", response_model=UserPublic)

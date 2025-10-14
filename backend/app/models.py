@@ -3,6 +3,8 @@ import uuid
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
+from datetime import datetime
+
 
 # Shared properties
 class UserBase(SQLModel):
@@ -44,6 +46,9 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    yandex_token: "YandexToken" = Relationship(
+        back_populates="owner", sa_relationship_kwargs={"uselist": False}
+    )
 
 
 # Properties to return via API, id is always required
@@ -111,3 +116,26 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+class YandexToken(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    token: str = Field(max_length=255, nullable=False)
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, unique=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    owner: User = Relationship(back_populates="yandex_token")
+
+
+class YandexTokenCreate(SQLModel):
+    token: str = Field(max_length=255)
+
+
+class YandexTokenPublic(SQLModel):
+    id: uuid.UUID
+    token: str
+    created_at: datetime
+
+
+class YandexTokensPublic(SQLModel):
+    data: list[YandexTokenPublic]
+    count: int

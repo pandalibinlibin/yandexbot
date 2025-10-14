@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import YandexToken, YandexTokenCreate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +53,38 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_yandex_token(
+    *, session: Session, yandex_token_in: YandexTokenCreate, owner_id: uuid.UUID
+) -> YandexToken:
+    db_token = YandexToken.model_validate(
+        yandex_token_in, update={"owner_id": owner_id}
+    )
+    session.add(db_token)
+    session.commit()
+    session.refresh(db_token)
+    return db_token
+
+
+def get_user_yandex_token(
+    *, session: Session, owner_id: uuid.UUID
+) -> YandexToken | None:
+    statement = select(YandexToken).where(YandexToken.owner_id == owner_id)
+    return session.exec(statement).first()
+
+
+def update_yandex_token(
+    *, session: Session, db_token: YandexToken, yandex_token_in: YandexTokenCreate
+) -> YandexToken:
+    token_data = yandex_token_in.model_dump(exclude_unset=True)
+    db_token.sqlmodel_update(token_data)
+    session.add(db_token)
+    session.commit()
+    session.refresh(db_token)
+    return db_token
+
+
+def delete_yandex_token(*, session: Session, db_token: YandexToken) -> None:
+    session.delete(db_token)
+    session.commit()
