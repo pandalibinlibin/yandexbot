@@ -895,15 +895,26 @@ GROUP BY product_id
 - ✅ 定义完整的转化漏斗指标
 - ✅ 添加 InfluxDB 客户端依赖
 
+#### 数据服务层开发
+
+- ✅ 创建 InfluxDBService 类
+- ✅ 实现数据写入功能 (write_sales_metrics)
+- ✅ 实现数据查询功能 (query_sales_metrics)
+- ✅ 支持精确时间范围查询
+- ✅ 支持按天数查询的便捷方法
+- ✅ 查询结果转换为 pandas.DataFrame 宽表格式
+- ✅ 添加 pandas 依赖支持
+- ✅ 创建全局 influxdb_service 实例
+
 #### 下一步计划
 
-- [ ] 创建 InfluxDB 服务层
-- [ ] 实现数据写入和查询功能
 - [ ] 集成 Yandex.Market Partner API
 - [ ] 开发数据采集任务
+- [ ] 创建 API 接口层
+- [ ] 实现数据分析和可视化
 
 ---
 
 **最后更新**: 2024年12月19日
-**当前状态**: 基础架构搭建完成，准备开始 InfluxDB 服务开发
-**下一步**: 创建 InfluxDB 服务层和数据操作功能
+**当前状态**: InfluxDB 数据服务开发完成，准备集成 Yandex API
+**下一步**: 集成 Yandex.Market Partner API 进行数据采集
