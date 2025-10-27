@@ -906,15 +906,25 @@ GROUP BY product_id
 - ✅ 添加 pandas 依赖支持
 - ✅ 创建全局 influxdb_service 实例
 
+#### 数据采集层开发
+
+- ✅ 创建数据采集层基础架构
+- ✅ 设计抽象基类 BaseCollector
+- ✅ 创建 API 采集器基类 BaseAPICollector
+- ✅ 实现 Yandex Market API 采集器
+- ✅ 支持从数据库获取 token
+- ✅ 实现 OAuth 认证设置
+- ✅ 添加完整的日志支持
+
 #### 下一步计划
 
-- [ ] 集成 Yandex.Market Partner API
-- [ ] 开发数据采集任务
+- [ ] 实现数据采集方法
+- [ ] 创建任务调度系统
+- [ ] 集成 InfluxDB 数据存储
 - [ ] 创建 API 接口层
-- [ ] 实现数据分析和可视化
 
 ---
 
 **最后更新**: 2024年12月19日
-**当前状态**: InfluxDB 数据服务开发完成，准备集成 Yandex API
-**下一步**: 集成 Yandex.Market Partner API 进行数据采集
+**当前状态**: 数据采集层基础架构完成，准备实现数据采集方法
+**下一步**: 实现 Yandex Market API 数据采集方法
