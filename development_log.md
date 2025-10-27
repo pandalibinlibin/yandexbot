@@ -927,4 +927,116 @@ GROUP BY product_id
 
 **最后更新**: 2024年12月19日
 **当前状态**: 数据采集层基础架构完成，准备实现数据采集方法
-**下一步**: 实现 Yandex Market API 数据采集方法
+**下一步**: 实现任务调度系统
+
+## 最新更新
+
+### 2024-12-19: Yandex Market API 采集器完整实现完成
+
+基于 Yandex Market Partner API 文档，实现了完整的数据采集功能：
+
+#### 实现的 API 端点
+
+1. **订单统计 API** (`GET /v2/campaigns/{campaignId}/stats/orders`)
+
+   - 获取指定时间范围内的订单统计信息
+   - 支持按日期范围筛选
+   - 返回订单状态、价格、商品数量等信息
+
+2. **商品统计 API** (`POST /v2/campaigns/{campaignId}/stats/skus`)
+
+   - 获取指定 SKU 的商品统计信息
+   - 支持批量查询（最多 500 个 SKU）
+   - 返回商品价格、库存、分类等信息
+
+3. **商品列表 API** (`POST /v2/campaigns/{campaignId}/offers`)
+   - 获取店铺中所有商品的 SKU 列表
+   - 支持分页处理大量数据
+   - 使用 page_token 分页机制
+
+#### 数据采集器特性
+
+- **数据库 Token 集成**: 自动从 PostgreSQL 获取用户的 Yandex Token
+- **OAuth 认证**: 使用 OAuth Token 进行 API 认证
+- **智能 SKU 获取**: 自动获取所有商品 SKU，无需手动提供
+- **批量处理**: 支持大量 SKU 的批量查询（每批最多 500 个）
+- **分页处理**: 自动处理 SKU 列表的分页获取
+- **错误处理**: 完整的异常捕获和日志记录
+- **数据转换**: 将 API 响应转换为标准化的数据格式
+- **灵活参数**: 支持自定义时间范围、SKU 列表等参数
+
+#### 核心方法实现
+
+1. **`collect()`**: 主要数据采集入口
+2. **`_get_orders_stats()`**: 获取订单统计数据
+3. **`_get_goods_stats()`**: 获取商品统计数据（支持自动 SKU 获取）
+4. **`_get_all_shop_skus()`**: 获取所有商品 SKU 列表
+5. **`_get_goods_stats_batch()`**: 批量获取商品统计
+
+#### 使用示例
+
+```python
+# 创建采集器实例
+collector = await YandexMarketAPICollector.create_with_db_token(user_id="user-uuid")
+
+# 收集数据（自动获取所有 SKU）
+result = await collector.collect(
+    campaign_id="12345",
+    date_from=datetime(2024, 12, 1),
+    date_to=datetime(2024, 12, 19)
+)
+
+# 或者指定特定 SKU
+result = await collector.collect(
+    campaign_id="12345",
+    shop_skus=["SKU001", "SKU002"],
+    date_from=datetime(2024, 12, 1),
+    date_to=datetime(2024, 12, 19)
+)
+
+# 处理结果
+if result.success:
+    print(f"收集了 {result.total_records} 条记录")
+    for data in result.data:
+        print(f"类型: {data['type']}, 数据: {data}")
+```
+
+#### 技术亮点
+
+- **API 文档驱动**: 基于真实 API 文档实现，确保准确性
+- **错误处理**: 完整的异常捕获和日志记录
+- **性能优化**: 批量处理和分页机制
+- **数据标准化**: 统一的返回格式，便于后续处理
+- **扩展性**: 易于添加新的 API 端点和方法
+
+#### 数据入库功能
+
+- **InfluxDB 集成**: 自动将采集的数据存储到时序数据库
+- **时间戳处理**: 正确处理订单创建时间和商品统计时间
+- **数据转换**: 将不同 API 数据转换为统一的 SalesMetrics 格式
+- **存储计数**: 跟踪成功存储的记录数量
+- **错误处理**: 单条记录存储失败不影响整体流程
+
+#### 当前实现状态
+
+**已完成**:
+
+- ✅ API 集成框架搭建
+- ✅ 订单统计 API 集成 (`GET /v2/campaigns/{campaignId}/stats/orders`)
+- ✅ 商品统计 API 集成 (`POST /v2/campaigns/{campaignId}/stats/skus`)
+- ✅ 商品列表 API 集成 (`POST /v2/campaigns/{campaignId}/offers`)
+- ✅ InfluxDB 数据存储集成
+- ✅ 完整的错误处理和日志记录
+
+**待完善**:
+
+- ❌ 缺少核心业务指标（impressions, clicks, add_to_cart, ctr 等）
+- ❌ 需要集成真正的流量和转化数据 API
+- ❌ 需要添加单元测试和集成测试
+
+**下一步计划**:
+
+1. 添加 pytest 测试框架
+2. 编写单元测试和集成测试
+3. 寻找并集成真正的业务指标 API
+4. 实现任务调度系统
